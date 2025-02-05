@@ -1,0 +1,6 @@
+\contentsline {section}{\numberline {0.1}Introduction}{2}{}%
+\contentsline {section}{\numberline {0.2}Data Collection and Preprocessing}{2}{}%
+\contentsline {section}{\numberline {0.3}Model Architecture}{3}{}%
+\contentsline {section}{\numberline {0.4}Achieved Performance and Conclusion}{3}{}%
+\contentsline {section}{\numberline {0.5}Code}{4}{}%
+\contentsline {section}{\numberline {0.6}References}{6}{}%

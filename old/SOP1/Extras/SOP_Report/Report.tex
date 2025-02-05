@@ -1,0 +1,139 @@
+\documentclass{report}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{geometry}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{url}
+\usepackage{tabularx}
+\usepackage{listings}
+
+\lstset{
+    language=Python,
+    basicstyle=\small\ttfamily,
+    commentstyle=\color{gray},
+    keywordstyle=\color{blue},
+    numberstyle=\tiny\color{gray},
+    numbers=left,
+    frame=single,
+    breaklines=true,
+    breakatwhitespace=true,
+    captionpos=b,
+    showstringspaces=false,
+    tabsize=2
+}
+
+\definecolor{pagecolor}{RGB}{255,255,255}
+\pagecolor{pagecolor}
+
+% Increase the gap between paragraphs
+\setlength{\parskip}{1em}
+
+\title{
+    \begin{center}
+        \Huge\textbf{Deep Learning for Short-Term LoadForecasting—A Novel Classification-Based CNN Model}\\[1ex]
+          \end{center}
+}
+\author{Pulak Mehrotra\\2021AATS0017P}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+\newpage % Start the Introduction on the next page
+
+\section{Introduction}
+
+The idea of Short-Term Load Forecasting (STLF) for self-contained and controllable environments like Smart Grids, is to predict how the power requirements of the households within the environment. The idea behind this was to control the power supplied to the households using the Smart Grid. However, the general way of doing this was simply using prediction based Neural Networks. This poses the following problems:
+
+\begin{enumerate}
+    \item Using prediction based on the total power requirements of all the households within a given environment, we do not know which particular household or which particular group households is the main contributor for the power change. Knowing this information
+    
+    \item The prediction models take the erroneous readings of the model into consideration as well, when making the final prediction.
+\end{enumerate} 
+
+We propose a solution that addresses the first problem in entirety and takes some steps to minimise the effect of the second. For prediction for the environment, we can first do it household-wise. Then, we can consider each appliance in a household as having a certain state, for example, "ON" or "OFF". \textbf{These states can be predicted by classifying other features received by the device such as current and voltage into various states.}
+
+\section{Data Collection and Preprocessing}
+
+We use the IAWE dataset here because it contains the most informative data out of the freely available datasets, meaning it had the following data readings readily available for all the appliances making up a household:
+\begin{itemize}
+    \item Current
+    \item Voltage
+    \item Frequency of Operation
+    \item Active Power
+    \item Reactive Power
+    \item Previous Power Reading
+\end{itemize}
+
+For preprocessing, we assumed a household had three devices (a TV, a fridge and a coffee maker) and each device had three states. Steps taken:
+\begin{itemize}
+    \item Rounded down the power reading to integer values.
+    \item Find unique power readings and and the number of occurences of each
+    \item Created labels for every sample data as the weighted average of the power readings and their occurences
+\end{itemize}
+
+This data was truncated and saved to a CSV file. This data is the one worked on in the below code.
+
+\section{Model Architecture}
+
+\begin{itemize}
+    \item Initialize a sequential model (\texttt{model1}) with the following layers:
+    \begin{itemize}
+        \item 1D Convolutional layer
+        \item Dense, Fully Connected Layer with 16 neurons
+        \item 1D Max Pooling Layer
+        \item Another Dense layer with number of classes/states as output (here, 3)
+    \end{itemize}
+    \item The model was compiled using the following settings:
+    \begin{itemize}
+        \item Loss function: Sparse Categorical Cross-Entropy
+        \item Optimizer: Adam
+        \item Metric: Accuracy
+    \end{itemize}
+    \item Train the model on the provided data (\texttt{train\_fts} and \texttt{train\_targets}) with validation data (\texttt{test\_fts} and \texttt{test\_targets}) using 10 epochs and a batch size of 32.
+    \item Utilize the \texttt{ModelCheckpoint} callback to save the best model during training.
+    \end{itemize}
+
+\section{Achieved Performance and Conclusion}
+
+This is the Performance Analysis for the Coffee Maker. As shown below, the model is performing to decent extent for the power values classes, but unfortunately the erroneous values are once again causing the error percentage to go up. This can be altered by changing the bucketing of data to include the erroneous values to an extent as well.
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|c|c|}
+        \hline
+        \textbf{Error Type} & \textbf{Value} \\
+        \hline
+        MAE 1 & 162.3159902 \\
+        \hline
+        MSE & 26414.2554110 \\
+        \hline
+        MAPE & 0.7058395 \\
+        \hline
+    \end{tabular}
+\end{table}
+
+\newpage % Start the Introduction on the next page
+\section{Code}
+\lstinputlisting[caption={PCA and Neural Network Code}, label={lst:python_code}]{CNN_c.py}
+
+\section{References}
+
+\begin{itemize}
+    \item[\textbf{[1]}] H. Shi, M. Xu and R. Li, "Deep Learning for Household Load Forecasting—A Novel Pooling Deep RNN," in IEEE Transactions on Smart Grid, vol. 9, no. 5, pp. 5271-5280, Sept. 2018, doi: 10.1109/TSG.2017.2686012.
+
+    \item[\textbf{[2]}] A. M. Pirbazari, M. Farmanbar, A. Chakravorty and C. Rong, "Improving Load Forecast Accuracy of Households Using Load Disaggregation Techniques," 2020 International Conferences on Internet of Things (iThings) and IEEE Green Computing and Communications (GreenCom) and IEEE Cyber, Physical and Social Computing (CPSCom) and IEEE Smart Data (SmartData) and IEEE Congress on Cybermatics (Cybermatics), Rhodes, Greece, 2020, pp. 843-851, doi: 10.1109/iThings-GreenCom-CPSCom-SmartData-Cybermatics50389.2020.00140.
+
+    \item[\textbf{[3]}] J. Stack, R. G. Harley, P. Springer and J. A. Mahaffey, "Estimation of Wooden Cross-Arm Integrity Using Artificial Neural Networks and Laser Vibrometry," in IEEE Power Engineering Review, vol. 22, no. 12, pp. 66-66, Dec. 2002, doi: 10.1109/MPER.2002.4311942.
+
+    \item[\textbf{[4]}] C. Dong, C. C. Loy, K. He and X. Tang, "Image Super-Resolution Using Deep Convolutional Networks," in IEEE Transactions on Pattern Analysis and Machine Intelligence, vol. 38, no. 2, pp. 295-307, 1 Feb. 2016, doi: 10.1109/TPAMI.2015.2439281.
+
+    \item[\textbf{[5]}] A. A. Mamun, M. Sohel, N. Mohammad, M. S. Haque Sunny, D. R. Dipta and E. Hossain, "A Comprehensive Review of the Load Forecasting Techniques Using Single and Hybrid Predictive Models," in IEEE Access, vol. 8, pp. 134911-134939, 2020, doi: 10.1109/ACCESS.2020.3010702.
+\end{itemize}
+
+
+\end{document}
